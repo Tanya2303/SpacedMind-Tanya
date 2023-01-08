@@ -1,10 +1,67 @@
-import React from 'react'
-import { Link, useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { useNavigate, Link } from "react-router-dom";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { loginRoute } from "../utils/APIRoutes";
 
 export default function Login() {
+    const navigate = useNavigate();
+    const [values, setValues] = useState({ username: "", password: "" });
+    const toastOptions = {
+      position: "bottom-right",
+      autoClose: 8000,
+      pauseOnHover: true,
+      draggable: true,
+      theme: "dark",
+    };
+    useEffect(() => {
+      if (localStorage.getItem(process.env.REACT_APP_API_URL)) {
+        navigate("/");
+      }
+    }, []);
+  
+    const handleChange = (event) => {
+      setValues({ ...values, [event.target.name]: event.target.value });
+    };
+  
+    const validateForm = () => {
+      const { username, password } = values;
+      if (username === "") {
+        toast.error("Email and Password is required.", toastOptions);
+        return false;
+      } else if (password === "") {
+        toast.error("Email and Password is required.", toastOptions);
+        return false;
+      }
+      return true;
+    };
+  
+    const handleSubmit = async (event) => {
+      event.preventDefault();
+      if (validateForm()) {
+        const { username, password } = values;
+        const { data } = await axios.post(loginRoute, {
+          username,
+          password,
+        });
+        if (data.status === false) {
+          toast.error(data.msg, toastOptions);
+        }
+        if (data.status === true) {
+          localStorage.setItem(
+            process.env.REACT_APP_API_URL,
+            JSON.stringify(data.user)
+          );
+  
+          navigate("/");
+        }
+      }
+    };
+
     return (
         <div>
-            <div className="min-w-screen min-h-screen flex items-center justify-center px-5 py-5">
+            <form action="" onSubmit={(event) => handleSubmit(event)} className="min-w-screen min-h-screen flex items-center justify-center px-5 py-5">
                 <div className="bg-gray-100 text-gray-500 rounded-3xl shadow-xl w-[60rem] overflow-hidden h-[35rem]">
                     <div className="md:flex w-full">
                         <div className="hidden md:block w-1/2 bg-indigo-500 py-10 px-10 h-[40rem]">
@@ -20,7 +77,7 @@ export default function Login() {
                                         <label for="" className="text-xs font-semibold px-1">Email</label>
                                         <div className="flex">
                                             <div className="w-10 z-10 pl-1 text-center pointer-events-none flex items-center justify-center"><i className="mdi mdi-email-outline text-gray-400 text-lg"></i></div>
-                                            <input type="email" className="w-full -ml-10 pl-2 pr-3 py-2 rounded-lg border-2 border-gray-200 outline-none focus:border-indigo-500" placeholder="smith@exa.com" />
+                                            <input type="email" onChange={(e) => handleChange(e)} className="w-full -ml-10 pl-2 pr-3 py-2 rounded-lg border-2 border-gray-200 outline-none focus:border-indigo-500" placeholder="smith@exa.com" />
                                         </div>
                                     </div>
                                 </div>
@@ -29,7 +86,7 @@ export default function Login() {
                                         <label for="" className="text-xs font-semibold px-1">Password</label>
                                         <div className="flex">
                                             <div className="w-10 z-10 pl-1 text-center pointer-events-none flex items-center justify-center"><i className="mdi mdi-lock-outline text-gray-400 text-lg"></i></div>
-                                            <input type="password" className="w-full -ml-10 pl-2 pr-3 py-2 rounded-lg border-2 border-gray-200 outline-none focus:border-indigo-500" placeholder="password" />
+                                            <input type="password" onChange={(e) => handleChange(e)} className="w-full -ml-10 pl-2 pr-3 py-2 rounded-lg border-2 border-gray-200 outline-none focus:border-indigo-500" placeholder="password" />
                                         </div>
                                     </div>
                                 </div>
@@ -43,7 +100,7 @@ export default function Login() {
                         </div>
                     </div>
                 </div>
-            </div>
+            </form>
         </div>
     )
 }

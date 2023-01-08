@@ -1,19 +1,46 @@
-import React from 'react'
+import React, { useEffect, useState, useRef } from "react";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import { io } from "socket.io-client";
+import { allUsersRoute, host } from "../utils/APIRoutes";
+import ChatContainer from "../components/ChatContainer";
+import Contacts from "../components/Contacts";
+import Welcome from "../components/Welcome";
 
-export default function Chatroom() {
+export default function Chat() {
+    const navigate = useNavigate();
+    const socket = useRef();
+    const [contacts, setContacts] = useState([]);
+    const [currentChat, setCurrentChat] = useState(undefined);
+    const [currentUser, setCurrentUser] = useState(undefined);
+    useEffect(async () => {
+        if (!localStorage.getItem(process.env.REACT_APP_API_URL)) {
+            navigate("/login");
+        } else {
+            setCurrentUser(
+                await JSON.parse(
+                    localStorage.getItem(process.env.REACT_APP_API_URL)
+                )
+            );
+        }
+    }, []);
+    useEffect(() => {
+        if (currentUser) {
+            socket.current = io(host);
+            socket.current.emit("add-user", currentUser._id);
+        }
+    }, [currentUser]);
+    const handleChatChange = (chat) => {
+        setCurrentChat(chat);
+    };
     return (
-        <div>
-            <div className='text-center text-6xl font-base text-white'>Chatroom</div>
-            <div className='grid place-items-center py-10'>
-                <div className='border-2 border-tertiary rounded-b-md'>
-                    <div className='border-2 border-tertiary rounded-t-md bg-gray-500 p-4 w-[36rem] overflow-y-scroll flex flex-col h-128 max-w-7xl min-w-7xl'></div>
-                    <form className="w-full flex justify-center">
-                        <input
-                            className="h-8 p-2 w-full focus:outline-none rounded-bl-lg" />
-                        <button type="submit" className="w-16 font-bold tracking-wider text-white bg-gradient-to-r from-primary to-tertiary">SEND</button>
-                    </form>
+        <>
+            <div className="">
+                <div className="">
+                    <Contacts contacts={contacts} changeChat={handleChatChange} />
+                    <ChatContainer currentChat={currentChat} socket={socket} />
                 </div>
             </div>
-        </div>
-    )
+        </>
+    );
 }
