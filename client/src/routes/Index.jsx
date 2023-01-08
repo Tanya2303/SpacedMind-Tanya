@@ -1,11 +1,13 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import Navbar from '../components/Navbar';
-import Login from './Login';
-import Register from './Register';
-import Home from './Home';
-import Music from './Music';
+import Login from '../pages/Login';
+import Register from '../pages/Register';
+import Home from '../pages/Home';
+import Music from '../pages/Music';
+import Chatroom from '../pages/Chatroom';
+import Exercise from '../pages/Exercise';
 
-function Main() {
+function Index() {
     return (
         <BrowserRouter>
             <Navbar />
@@ -14,9 +16,11 @@ function Main() {
                 <Route path='/register' element={<Register />} />
                 <Route path="/" element={<Home />} />
                 <Route path="/music" element={<Music />} />
+                <Route path="/chatroom" element={<Chatroom />} />
+                <Route path="/exercise" element={<Exercise />} />
             </Routes>
         </BrowserRouter>
     );
 }
 
-export default Main;
+export default Index;
